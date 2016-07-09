@@ -52,14 +52,15 @@ OUTPUT=$3
 ALL_FOLIOS=$(get_column "${ALL_FILE}" 1)
 MONTH_FOLIOS=$(get_column "${MONTH_FILE}" 6)
 
-echo "all="${ALL_FOLIOS}
-echo "month="${MONTH_FOLIOS}
-
 FOLIOS=$(get_intersection "${ALL_FOLIOS}" "${MONTH_FOLIOS}")
 
-echo $FOLIOS
-
 function aggregate_values {
+
+    # Result sample: 
+    # folioplus,  clv_statussolicitud, pagado,     fecha_afiliacion, stasol
+    # 1 (online), 4 (online),          8 (online), 6 (online),       5(por mes)
+
+    echo "folio,clv_statussolicitud,pagado,fecha_afiliacion,stasol"
     for folio in $FOLIOS
     do
         COLS_ALL=$(lookup $ALL_FILE ${folio} 1,4,6,8)
@@ -67,9 +68,5 @@ function aggregate_values {
         echo "${COLS_ALL},${COLS_MONTH}"
     done
 }
-
-# Result sample: 
-# folioplus, clv_statussolicitud, pagado, fecha_afiliacion, foliotarjeta, stasol
-# 1 (online), 4 (online),         8 (online), 6 (online),   6 (por mes),  5(por mes)
 
 aggregate_values > $OUTPUT

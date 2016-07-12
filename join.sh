@@ -38,7 +38,7 @@ function lookup {
     local FOLIO=$2
     local COL_NUMS=$3
 
-    grep $FOLIO $FILE | cut -d',' -f$COL_NUMS
+    grep -m1 $FOLIO $FILE | cut -d',' -f$COL_NUMS
 }
 
 

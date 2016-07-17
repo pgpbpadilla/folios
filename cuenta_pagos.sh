@@ -40,10 +40,13 @@ function count_payments {
 	    payment_count["$folio"]=$((COUNT+1))
 	    last_payment["$folio"]=${months[$MONTH_IDX]}
 
-	    echo "$folio,${payment_count["$folio"]},${last_payment["$folio"]}"
 	done
     done
 
+    for key in "${!payment_count[@]}"
+    do
+	echo "$key,${payment_count["$key"]},${last_payment["$key"]}"
+    done
 }
 
 # folio, cuenta_pagos, fecha_ultimo_pago

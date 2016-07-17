@@ -1,17 +1,5 @@
 #!/bin/bash
 
-function get_folios {
-    INPUT_DIR=$1
-    OUTPUT=folios_mes-$(pwgen 6 1).tmp
-
-    if ! cat $INPUT_DIR/*.csv | cut -d',' -f 1 | sort | uniq | head -n -1 > $OUTPUT;
-    then
-	echo "Error processing input files"
-    fi
-    
-    echo $OUTPUT
-}
-
 function count_payments {
 
     declare -A months
@@ -28,35 +16,35 @@ function count_payments {
 	["12"]="Diciembre"
     )
     declare -A last_payment
+    declare -A payment_count
     
     local INPUT_DIR=$1
-    local FOLIOS=$(get_folios $INPUT_DIR)
 
     echo "folio,cuenta_pagos,fecha_ultimo_pago"
     
-    for folio in $(cat $FOLIOS)
+    for month_file in $(ls $INPUT_DIR/*.csv);
     do
-	local COUNT=0
-	# echo "looking for $folio ..."
-	for month_file in $(ls $INPUT_DIR/*.csv);
+	for line in $(cat ${month_file});
 	do
+	    local folio=$(echo $line | cut -d',' -f1)
+
 	    # e.g. result03.csv => result03
 	    local BASE_NAME=$(echo "${month_file}" | cut -d'.' -f1)
 	    # e.g., result03 => 03
 	    local MONTH_IDX=${BASE_NAME: -2}
-	    # echo "... in file: $month_file"
-	    if grep -q $folio "${month_file}"; then
-		COUNT=$((COUNT+1))
-		last_payment["$folio"]=${months[$MONTH_IDX]}
-	    fi
-	done
-	# echo -n "Folio: $folio, "
-	# echo -n "count: $COUNT, "
-	# echo "last: ${last_payment["$folio"]}"
-	echo "$folio,$COUNT,${last_payment["$folio"]}"
-    done
-}
 
+	    [ ! "${payment_count["$folio"]}" ] && payment_count["$folio"]=0
+	    
+	    local COUNT="${payment_count["$folio"]}"
+	    # echo "COUNT: $COUNT"
+	    payment_count["$folio"]=$((COUNT+1))
+	    last_payment["$folio"]=${months[$MONTH_IDX]}
+
+	    echo "$folio,${payment_count["$folio"]},${last_payment["$folio"]}"
+	done
+    done
+
+}
 
 # folio, cuenta_pagos, fecha_ultimo_pago
 # 123,   4,            Marzo
